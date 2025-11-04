@@ -1,24 +1,53 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import Landing from "./components/Landing";
+import Login from "./components/Auth/Login";
+import Register from "./components/Auth/Register";
+import GroupsGrid from "./components/Groups/GroupsGrid";
+import { Box, CssBaseline } from "@mui/material";
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <CssBaseline />
+      <Box
+        sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+      >
+        <Header isAuthenticated={isAuthenticated} />
+
+        <Box component="main" sx={{ flexGrow: 1 }}>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route
+              path="/login"
+              element={<Login onLogin={() => setIsAuthenticated(true)} />}
+            />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/groups"
+              element={
+                isAuthenticated ? (
+                  <GroupsGrid />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+          </Routes>
+        </Box>
+
+        <Footer />
+      </Box>
+    </Router>
   );
 }
 
