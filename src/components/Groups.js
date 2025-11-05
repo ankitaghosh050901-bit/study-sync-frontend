@@ -1,31 +1,54 @@
-import React from "react";
-import { Container, Typography, Box, Grid, Paper } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Container, Typography, Box } from "@mui/material";
+import GroupCard from "./components/Groups/GroupCard";
+import groupData from "./data/groupData";
+import useJoinedGroups from "./hooks/useJoinedGroups";
 
 const Groups = () => {
-  // simple placeholder groups page
-  const sampleGroups = [
-    { id: 1, name: "Math Study Group", members: 8 },
-    { id: 2, name: "Physics Review", members: 5 },
-    { id: 3, name: "Chemistry Lab Prep", members: 12 },
-  ];
+  const [groups, setGroups] = useState([]);
+  const { joinedGroups, joinGroup } = useJoinedGroups();
+
+  useEffect(() => {
+    setGroups(groupData);
+  }, []);
+
+  const joinedGroupList = groups.filter((g) => joinedGroups.includes(g.id));
+  const exploreGroupList = groups.filter((g) => !joinedGroups.includes(g.id));
 
   return (
-    <Container maxWidth="lg" sx={{ mt: { xs: 4, sm: 8 }, px: { xs: 2, sm: 4 } }}>
-      <Typography variant="h4" gutterBottom>
-        My Groups
-      </Typography>
-      <Grid container spacing={2}>
-        {sampleGroups.map((g) => (
-          <Grid item xs={12} sm={6} md={4} key={g.id}>
-            <Paper sx={{ p: 2 }} elevation={2}>
-              <Typography variant="h6">{g.name}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Members: {g.members}
-              </Typography>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
+    <Container>
+      {/* 🔼 MOVED: My Groups comes first */}
+      <Box mt={4}>
+        <Typography variant="h4" gutterBottom>
+          My Groups
+        </Typography>
+        {joinedGroupList.length === 0 ? (
+          <Typography>You have not joined any groups yet.</Typography>
+        ) : (
+          joinedGroupList.map((group) => (
+            <GroupCard key={group.id} group={group} isJoined />
+          ))
+        )}
+      </Box>
+
+      {/* 🔽 Explore Groups comes after */}
+      <Box mt={6}>
+        <Typography variant="h4" gutterBottom>
+          Explore Study Groups
+        </Typography>
+        {exploreGroupList.length === 0 ? (
+          <Typography>You’ve joined all groups!</Typography>
+        ) : (
+          exploreGroupList.map((group) => (
+            <GroupCard
+              key={group.id}
+              group={group}
+              isJoined={false}
+              onJoin={() => joinGroup(group.id)}
+            />
+          ))
+        )}
+      </Box>
     </Container>
   );
 };
