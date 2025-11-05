@@ -9,7 +9,7 @@ const groupData = [
   {
     id: "java",
     name: "Java",
-    color: "#fb8c00",
+    color: "#805c31ff",
     description: "OOP, collections, Spring basics.",
     participants: 95,
   },

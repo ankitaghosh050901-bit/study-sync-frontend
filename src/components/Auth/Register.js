@@ -4,16 +4,16 @@ import {
   TextField,
   Button,
   Typography,
+  Paper,
   Box,
-  Grid,
+  Stack,
   Link,
 } from "@mui/material";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import { Link as RouterLink } from "react-router-dom";
+import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 
 const Register = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     username: "",
     email: "",
     password: "",
@@ -21,101 +21,127 @@ const Register = () => {
   });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (formData.password !== formData.confirmPassword) {
-      alert("❌ Passwords do not match!");
-      return;
-    }
-
-    // In a real app, send data to backend here
-    console.log("Registering user:", formData);
-
-    // ✅ Show success message
-    alert("✅ Registered successfully! Please log in to continue.");
-
-    // Redirect to login page
-    navigate("/login");
+    console.log("Form submitted:", form);
   };
 
   return (
-    <Container maxWidth="xs">
-      <Box
+    <Container
+      maxWidth="sm"
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background:
+          "linear-gradient(135deg, rgba(25,118,210,0.05), rgba(156,39,176,0.08))",
+        py: 2,
+      }}
+    >
+      <Paper
+        elevation={5}
         sx={{
-          mt: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          width: "100%",
+          p: { xs: 2.5, md: 3 },
+          borderRadius: 4,
+          textAlign: "center",
+          transform: "scale(0.95)", // ✅ slightly smaller to fit on one screen
         }}
       >
-        <Typography variant="h4" gutterBottom>
+        <Typography
+          variant="h4"
+          sx={{
+            mb: 2,
+            fontWeight: 800,
+            color: "#000",
+          }}
+        >
           Register
         </Typography>
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
-          <TextField
-            fullWidth
-            label="Username"
-            name="username"
-            margin="normal"
-            required
-            value={formData.username}
-            onChange={handleChange}
-          />
-          <TextField
-            fullWidth
-            label="Email"
-            name="email"
-            type="email"
-            margin="normal"
-            required
-            value={formData.email}
-            onChange={handleChange}
-          />
-          <TextField
-            fullWidth
-            label="Password"
-            name="password"
-            type="password"
-            margin="normal"
-            required
-            value={formData.password}
-            onChange={handleChange}
-          />
-          <TextField
-            fullWidth
-            label="Confirm Password"
-            name="confirmPassword"
-            type="password"
-            margin="normal"
-            required
-            value={formData.confirmPassword}
-            onChange={handleChange}
-          />
+        <Box component="form" onSubmit={handleSubmit}>
+          <Stack spacing={2}>
+            <TextField
+              size="small"
+              fullWidth
+              label="Username"
+              name="username"
+              value={form.username}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              size="small"
+              fullWidth
+              type="email"
+              label="Email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              size="small"
+              fullWidth
+              type="password"
+              label="Password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              size="small"
+              fullWidth
+              type="password"
+              label="Confirm Password"
+              name="confirmPassword"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              required
+            />
 
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            startIcon={<PersonAddIcon />}
-          >
-            Register
-          </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              size="medium"
+              startIcon={<PersonAddAltIcon />}
+              sx={{
+                mt: 1,
+                py: 1,
+                background: "linear-gradient(90deg,#1976d2,#9c27b0)",
+                fontWeight: 700,
+                letterSpacing: 0.4,
+                "&:hover": {
+                  background: "linear-gradient(90deg,#1565c0,#7b1fa2)",
+                },
+              }}
+            >
+              Register
+            </Button>
 
-          <Grid container justifyContent="flex-end" sx={{ mt: 2 }}>
-            <Grid item>
-              <Link component={RouterLink} to="/login" variant="body2">
-                Already have an account? Login
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              Already have an account?{" "}
+              <Link
+                component={RouterLink}
+                to="/login"
+                sx={{
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  color: "#1976d2",
+                  "&:hover": { textDecoration: "underline" },
+                }}
+              >
+                Log in
               </Link>
-            </Grid>
-          </Grid>
+            </Typography>
+          </Stack>
         </Box>
-      </Box>
+      </Paper>
     </Container>
   );
 };
