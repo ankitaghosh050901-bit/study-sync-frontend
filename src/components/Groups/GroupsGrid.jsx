@@ -1,62 +1,71 @@
 import React, { useState, useEffect } from "react";
-import { Grid, Container, Typography, Box, Button, Alert } from "@mui/material";
+import { Grid, Container, Typography, Box, Button } from "@mui/material";
+import axios from "axios";
 import GroupCard from "./GroupCard";
 import GroupDetailPage from "./GroupDetailPage";
-import CreateGroupModal from "./CreateGroupModal";
-import { GroupService } from "../../services/api";
+import { getAccessToken } from "../../utils/token"; // Import centralized token
 
 const GroupsGrid = () => {
   const [selected, setSelected] = useState(null);
-  const [availableGroups, setAvailableGroups] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [joinedGroups, setJoinedGroups] = useState([]);
-  const [adminGroups, setAdminGroups] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [createModalOpen, setCreateModalOpen] = useState(false);
 
-  const fetchGroups = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const [available, joined, admin] = await Promise.all([
-        GroupService.listGroups(),
-        GroupService.getMyGroups(),
-        GroupService.getMyAdminGroups()
-      ]);
-      
-      setAvailableGroups(available.data);
-      setJoinedGroups(joined.data);
-      setAdminGroups(admin.data);
-    } catch (err) {
-      console.error("Error fetching groups:", err);
-      setError("Failed to load groups. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const userToken = getAccessToken(); // Use centralized function
 
   useEffect(() => {
-    fetchGroups();
-  }, []);
-
-  const handleCreateGroup = async (newGroup) => {
-    try {
-      await GroupService.createGroup(newGroup);
-      fetchGroups(); // Refresh the lists
-    } catch (err) {
-      console.error("Error creating group:", err);
-      setError("Failed to create group. Please try again.");
+    if (!userToken) {
+      setLoading(false);
+      return;
     }
-  };
 
-  const joinGroup = async (id) => {
-    try {
-      await GroupService.joinGroup(id);
-      fetchGroups(); // Refresh lists after joining
-    } catch (err) {
-      console.error("Error joining group:", err);
-      setError("Failed to join group. Please try again.");
-    }
+    // Fetch all groups
+    axios
+      .get("http://127.0.0.1:8000/api/groups/", {
+        headers: { Authorization: `Bearer ${userToken}` },
+      })
+      .then((response) => {
+        setGroups(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching groups:", error);
+        setLoading(false);
+      });
+
+    // Fetch the user's joined groups
+    axios
+      .get("http://127.0.0.1:8000/api/groups/my-groups/", {
+        headers: { Authorization: `Bearer ${userToken}` },
+      })
+      .then((response) => {
+        const joinedGroupIds = response.data.map((group) => group.id);
+        setJoinedGroups(joinedGroupIds);
+      })
+      .catch((error) => {
+        console.error("Error fetching joined groups:", error);
+      });
+  }, [userToken]); // Re-run if token changes
+
+  const joinGroup = (id) => {
+    if (!userToken) return;
+
+    axios
+      .post(
+        `http://127.0.0.1:8000/api/groups/${id}/join/`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${userToken}` },
+        }
+      )
+      .then((response) => {
+        if (response.data.detail === "Joined group") {
+          setJoinedGroups((prev) => [...prev, id]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error joining group:", error);
+      });
   };
 
   if (selected) {
@@ -79,56 +88,38 @@ const GroupsGrid = () => {
         }}
       >
         <Typography variant="h4">Explore Study Groups</Typography>
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setCreateModalOpen(true)}
-          >
-            Create Group
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() =>
-              document
-                .getElementById("my-groups-section")
-                ?.scrollIntoView({ behavior: "smooth" })
-            }
-          >
-            My Groups
-          </Button>
-        </Box>
+        <Button
+          variant="outlined"
+          onClick={() =>
+            document
+              .getElementById("my-groups-section")
+              ?.scrollIntoView({ behavior: "smooth" })
+          }
+        >
+          My Groups
+        </Button>
       </Box>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
 
       {loading ? (
         <Typography>Loading groups...</Typography>
+      ) : !userToken ? (
+        <Typography color="error">Please log in to view groups.</Typography>
       ) : (
-        <Grid container spacing={3} justifyContent="center">
-          {availableGroups.length === 0 ? (
-            <Grid item xs={12}>
-              <Typography align="center">No available groups to join!</Typography>
-            </Grid>
+        <Grid container justifyContent="center">
+          {exploreList.length === 0 ? (
+            <Typography>You have joined all groups!</Typography>
           ) : (
-            availableGroups.map((g) => (
-              <Grid item xs={12} sm={6} md={4} key={g.id}>
-                <GroupCard
-                  key={g.id}
-                  title={g.name}
-                  overview={g.description}
-                  color="#1976d2"
-                  createdBy={g.created_by.username}
-                  createdAt={new Date(g.created_at).toLocaleDateString()}
-                  isJoined={false}
-                  onJoin={() => joinGroup(g.id)}
-                  onView={() => setSelected(g)}
-                />
-              </Grid>
+            exploreList.map((g) => (
+              <GroupCard
+                key={g.id}
+                title={g.name}
+                participants={g.participants}
+                overview={g.description}
+                color={g.color}
+                isJoined={joinedGroups.includes(g.id)}
+                onJoin={() => joinGroup(g.id)}
+                onView={() => setSelected(g)}
+              />
             ))
           )}
         </Grid>
@@ -140,42 +131,26 @@ const GroupsGrid = () => {
           My Groups
         </Typography>
 
-        <Grid container spacing={3} justifyContent="center">
-          {loading ? (
-            <Grid item xs={12}>
-              <Typography>Loading groups...</Typography>
-            </Grid>
-          ) : joinedGroups.length === 0 ? (
-            <Grid item xs={12}>
-              <Typography color="text.secondary" align="center">
-                You have not joined any groups yet.
-              </Typography>
-            </Grid>
+        <Grid container justifyContent="center">
+          {joinedList.length === 0 ? (
+            <Typography color="text.secondary">
+              You have not joined any groups yet.
+            </Typography>
           ) : (
-            joinedGroups.map((g) => (
-              <Grid item xs={12} sm={6} md={4} key={g.id}>
-                <GroupCard
-                  key={g.id}
-                  title={g.name}
-                  overview={g.description}
-                  color="#1976d2"
-                  createdBy={g.created_by.username}
-                  createdAt={new Date(g.created_at).toLocaleDateString()}
-                  isJoined={true}
-                  isAdmin={adminGroups.some(ag => ag.id === g.id)}
-                  onView={() => setSelected(g)}
-                />
-              </Grid>
+            joinedList.map((g) => (
+              <GroupCard
+                key={g.id}
+                title={g.name}
+                participants={g.participants}
+                overview={g.description}
+                color={g.color}
+                isJoined={true}
+                onView={() => setSelected(g)}
+              />
             ))
           )}
         </Grid>
       </Box>
-      
-      <CreateGroupModal
-        open={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        onSuccess={handleCreateGroup}
-      />
     </Container>
   );
 };

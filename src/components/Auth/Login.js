@@ -12,9 +12,10 @@ import {
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import LoginIcon from "@mui/icons-material/Login";
 import api from "./api"; // Axios instance
+import { setTokens } from "../../utils/token"; // <-- NEW
 
 const Login = ({ onLogin }) => {
-  const [form, setForm] = useState({ username: "", password: "" }); // Update to use 'username' instead of 'email'
+  const [form, setForm] = useState({ username: "", password: "" });
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -25,23 +26,21 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
 
     try {
-      // Send the request with 'username' and 'password'
       const response = await api.post("http://127.0.0.1:8000/api/auth/login/", {
-        username: form.username, // Use 'username' instead of 'email'
+        username: form.username,
         password: form.password,
       });
 
       const { access, refresh } = response.data;
       console.log("Login Successful:", response.data);
 
-      // Save tokens to localStorage/sessionStorage
-      localStorage.setItem("access_token", access);
-      localStorage.setItem("refresh_token", refresh);
+      // ---- CENTRAL TOKEN STORAGE ----
+      setTokens(access, refresh); // <-- NEW
 
       // Mark user as logged in
-      onLogin(); // pass the function to set `isAuthenticated` in the parent component
+      onLogin?.();
 
-      // Redirect user to groups page
+      // Redirect to groups page
       navigate("/groups");
     } catch (error) {
       console.error(
@@ -79,12 +78,11 @@ const Login = ({ onLogin }) => {
 
         <Box component="form" onSubmit={handleSubmit}>
           <Stack spacing={2.5}>
-            {/* Username input instead of email */}
             <TextField
               fullWidth
-              type="text" // This is a username field, not an email field
+              type="text"
               label="Username"
-              name="username" // Updated from 'email' to 'username'
+              name="username"
               value={form.username}
               onChange={handleChange}
               required
@@ -99,7 +97,6 @@ const Login = ({ onLogin }) => {
               required
             />
 
-            {/* Gradient login button */}
             <Button
               type="submit"
               variant="contained"
