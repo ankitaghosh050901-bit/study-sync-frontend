@@ -14,8 +14,11 @@ import {
   TableBody,
   Tabs,
   Tab,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
+import axios from "axios";
 
 //  IMPORTANT: correct relative import (Groups → Sessions)
 import ViewSessionPage from "../Sessions/ViewSessionPage";
@@ -23,9 +26,58 @@ import ToDoGrid from "./ToDoGrid";
 import GroupDocuments from "./GroupDocuments";
 
 export default function GroupDetailPage({ group, onBack, isAdmin = false }) {
-  //  New: track which session to show
   const [selectedSession, setSelectedSession] = useState(null);
   const [tab, setTab] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleLeaveGroup = async () => {
+    setLoading(true);
+    try {
+      await GroupService.leaveGroup(group.id);
+      setSuccess("Successfully left the group");
+      setTimeout(() => onBack(), 1500);
+    } catch (err) {
+      console.error("Error leaving group:", err);
+      setError(err.response?.data?.detail || "Failed to leave group");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const userToken = localStorage.getItem("access_token");
+
+  const handleLeaveGroup = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await axios.post(
+        `/api/groups/${group.id}/leave/`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${userToken}` },
+        }
+      );
+      if (response.data.detail === "Left group") {
+        setSuccess("Successfully left the group");
+        // Remove from local storage and go back after a short delay
+        const joined = JSON.parse(localStorage.getItem("joined_groups_v1") || "[]");
+        localStorage.setItem(
+          "joined_groups_v1",
+          JSON.stringify(joined.filter(id => id !== group.id))
+        );
+        setTimeout(() => onBack(), 1500);
+      }
+    } catch (err) {
+      console.error("Error leaving group:", err);
+      setError(err.response?.data?.detail || "Failed to leave group");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Demo data
   const activeSessions = [
@@ -248,7 +300,7 @@ export default function GroupDetailPage({ group, onBack, isAdmin = false }) {
               >
                 <Typography
                   variant="h6"
-                  sx={{ color: group.color, fontWeight: 600 }}
+                  sx={{ color: '#fffff', fontWeight: 600 }}
                 >
                   Uploaded Documents
                 </Typography>
@@ -316,7 +368,7 @@ export default function GroupDetailPage({ group, onBack, isAdmin = false }) {
       </Card>
 
       {/* Bottom grid for Tasks & Docs if you want more content density */}
-      <Grid container spacing={3} sx={{ mt: 3 }}>
+      {/* <Grid container spacing={3} sx={{ mt: 3 }}>
         <Grid item xs={12} md={6}>
           <Card
             sx={{ borderRadius: 3, boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}
@@ -347,7 +399,7 @@ export default function GroupDetailPage({ group, onBack, isAdmin = false }) {
             </CardContent>
           </Card>
         </Grid>
-      </Grid>
+      </Grid> */}
     </Box>
   );
 }

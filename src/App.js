@@ -28,7 +28,10 @@ function App() {
         }}
       >
         {/* ✅ Pass authentication prop to Header if needed */}
-        <Header isAuthenticated={isAuthenticated} />
+        <Header
+          isAuthenticated={isAuthenticated}
+          setIsAuthenticated={setIsAuthenticated}
+        />
 
         <Box component="main" sx={{ flexGrow: 1 }}>
           <Routes>

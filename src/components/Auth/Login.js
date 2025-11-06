@@ -11,10 +11,11 @@ import {
 } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import LoginIcon from "@mui/icons-material/Login";
+import api from "./api"; // Axios instance
 
 const Login = ({ onLogin }) => {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const navigate = useNavigate(); // ✅ redirect after login
+  const [form, setForm] = useState({ username: "", password: "" }); // Update to use 'username' instead of 'email'
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,9 +24,32 @@ const Login = ({ onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Simulate login success (replace with API call if needed)
-    onLogin(); // ✅ sets isAuthenticated(true)
-    navigate("/groups"); // ✅ redirect to groups page after login
+    try {
+      // Send the request with 'username' and 'password'
+      const response = await api.post("http://127.0.0.1:8000/api/auth/login/", {
+        username: form.username, // Use 'username' instead of 'email'
+        password: form.password,
+      });
+
+      const { access, refresh } = response.data;
+      console.log("Login Successful:", response.data);
+
+      // Save tokens to localStorage/sessionStorage
+      localStorage.setItem("access_token", access);
+      localStorage.setItem("refresh_token", refresh);
+
+      // Mark user as logged in
+      onLogin(); // pass the function to set `isAuthenticated` in the parent component
+
+      // Redirect user to groups page
+      navigate("/groups");
+    } catch (error) {
+      console.error(
+        "Login Error:",
+        error.response ? error.response.data : error
+      );
+      alert("Invalid credentials or error during login");
+    }
   };
 
   return (
@@ -55,12 +79,13 @@ const Login = ({ onLogin }) => {
 
         <Box component="form" onSubmit={handleSubmit}>
           <Stack spacing={2.5}>
+            {/* Username input instead of email */}
             <TextField
               fullWidth
-              type="email"
-              label="Email"
-              name="email"
-              value={form.email}
+              type="text" // This is a username field, not an email field
+              label="Username"
+              name="username" // Updated from 'email' to 'username'
+              value={form.username}
               onChange={handleChange}
               required
             />

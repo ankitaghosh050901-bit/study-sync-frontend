@@ -1,3 +1,4 @@
+// Register.js
 import React, { useState } from "react";
 import {
   Container,
@@ -9,8 +10,9 @@ import {
   Stack,
   Link,
 } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
+import api from "./api"; // Axios instance
 
 const Register = () => {
   const [form, setForm] = useState({
@@ -19,14 +21,35 @@ const Register = () => {
     password: "",
     confirmPassword: "",
   });
+  const navigate = useNavigate(); // to navigate after registration
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", form);
+
+    // Ensure passwords match
+    if (form.password !== form.confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    try {
+      const response = await api.post("http://127.0.0.1:8000/api/auth/register/", {
+        username: form.username,
+        email: form.email,
+        password: form.password,
+      });
+      console.log("Registration Successful:", response.data);
+
+      // After successful registration, navigate to login page
+      navigate("/login");
+    } catch (error) {
+      console.error("Registration Error:", error.response.data);
+      alert("Error during registration!");
+    }
   };
 
   return (
@@ -49,17 +72,10 @@ const Register = () => {
           p: { xs: 2.5, md: 3 },
           borderRadius: 4,
           textAlign: "center",
-          transform: "scale(0.95)", // ✅ slightly smaller to fit on one screen
+          transform: "scale(0.95)",
         }}
       >
-        <Typography
-          variant="h4"
-          sx={{
-            mb: 2,
-            fontWeight: 800,
-            color: "#000",
-          }}
-        >
+        <Typography variant="h4" sx={{ mb: 2, fontWeight: 800, color: "#000" }}>
           Register
         </Typography>
 
