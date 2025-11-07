@@ -23,11 +23,29 @@ export const loadAuthFromStorage = () => {
   const userStr = localStorage.getItem(STORAGE_KEYS.USER);
   const profileStr = localStorage.getItem(STORAGE_KEYS.PROFILE);
 
+  let user = null;
+  let profile = null;
+
+  // Safely parse JSON with error handling
+  try {
+    if (userStr) user = JSON.parse(userStr);
+  } catch (error) {
+    console.error('Failed to parse user data from localStorage:', error);
+    localStorage.removeItem(STORAGE_KEYS.USER);
+  }
+
+  try {
+    if (profileStr) profile = JSON.parse(profileStr);
+  } catch (error) {
+    console.error('Failed to parse profile data from localStorage:', error);
+    localStorage.removeItem(STORAGE_KEYS.PROFILE);
+  }
+
   return {
     accessToken: access,
     refreshToken: refresh,
-    user: userStr ? JSON.parse(userStr) : null,
-    profile: profileStr ? JSON.parse(profileStr) : null,
+    user,
+    profile,
   };
 };
 
@@ -39,4 +57,15 @@ export const getAccessToken = () => {
 // Get refresh token
 export const getRefreshToken = () => {
   return localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+};
+
+// Update profile in storage while preserving other auth data
+export const updateProfileInStorage = (profile) => {
+  const storedAuth = loadAuthFromStorage();
+  saveAuthToStorage(
+    storedAuth.accessToken,
+    storedAuth.refreshToken,
+    storedAuth.user,
+    profile
+  );
 };

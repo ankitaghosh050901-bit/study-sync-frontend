@@ -1,7 +1,7 @@
 // src/features/auth/authSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as authService from './authService';
-import { loadAuthFromStorage, clearAuthFromStorage, saveAuthToStorage } from '../../utils/storage';
+import { loadAuthFromStorage, clearAuthFromStorage, updateProfileInStorage } from '../../utils/storage';
 import { handleAsyncError } from '../../utils/errorHandler';
 
 // Async thunk for registration with auto-login
@@ -36,13 +36,7 @@ export const fetchProfile = createAsyncThunk(
       const profile = await authService.fetchUserProfile();
       
       // Update profile in localStorage
-      const storedAuth = loadAuthFromStorage();
-      saveAuthToStorage(
-        storedAuth.accessToken,
-        storedAuth.refreshToken,
-        storedAuth.user,
-        profile
-      );
+      updateProfileInStorage(profile);
       
       return profile;
     } catch (error) {
@@ -59,13 +53,7 @@ export const updateProfile = createAsyncThunk(
       const profile = await authService.updateUserProfile(profileData);
       
       // Update profile in localStorage
-      const storedAuth = loadAuthFromStorage();
-      saveAuthToStorage(
-        storedAuth.accessToken,
-        storedAuth.refreshToken,
-        storedAuth.user,
-        profile
-      );
+      updateProfileInStorage(profile);
       
       return profile;
     } catch (error) {

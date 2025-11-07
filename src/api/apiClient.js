@@ -62,9 +62,11 @@ apiClient.interceptors.response.use(
           // If refresh fails, clear tokens and redirect to login
           clearAuthFromStorage();
           
-          // Note: Using window.location.href instead of React Router navigation
-          // because this is an axios interceptor outside React component context.
-          // A full page reload ensures clean state after auth failure.
+          // Note: Using window.location.href for full page reload is intentional.
+          // This axios interceptor runs outside React context, so we can't use
+          // React Router navigation. A full reload ensures clean auth state
+          // after token expiration, preventing stale data or infinite loops.
+          // The Redux store will be rehydrated from localStorage on next load.
           window.location.href = '/login';
           
           return Promise.reject(refreshError);
