@@ -1,15 +1,19 @@
 import React from "react";
 import { Button } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
+import { logout } from "../store/slices/authSlice";
 
-const AuthButton = ({ isAuthenticated, onLogout }) => {
+const AuthButton = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   const handleLogout = () => {
-    onLogout(); // Update parent state
-    navigate("/"); // Redirect to home after logout
+    dispatch(logout());
+    navigate("/");
   };
 
   if (isAuthenticated) {

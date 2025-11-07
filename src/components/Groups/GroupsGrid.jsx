@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Grid, Container, Typography, Box, Button } from "@mui/material";
-import axios from "axios";
 import GroupCard from "./GroupCard";
 import GroupDetailPage from "./GroupDetailPage";
-import { getAccessToken } from "../../utils/token"; // Import centralized token
+import apiClient from "../../services/apiClient";
 
 const GroupsGrid = () => {
   const [selected, setSelected] = useState(null);
@@ -11,19 +10,10 @@ const GroupsGrid = () => {
   const [joinedGroups, setJoinedGroups] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const userToken = getAccessToken(); // Use centralized function
-
   useEffect(() => {
-    if (!userToken) {
-      setLoading(false);
-      return;
-    }
-
     // Fetch all groups
-    axios
-      .get("http://127.0.0.1:8000/api/groups/", {
-        headers: { Authorization: `Bearer ${userToken}` },
-      })
+    apiClient
+      .get("/api/groups/")
       .then((response) => {
         setGroups(response.data);
         setLoading(false);
@@ -34,10 +24,8 @@ const GroupsGrid = () => {
       });
 
     // Fetch the user's joined groups
-    axios
-      .get("http://127.0.0.1:8000/api/groups/my-groups/", {
-        headers: { Authorization: `Bearer ${userToken}` },
-      })
+    apiClient
+      .get("/api/groups/my-groups/")
       .then((response) => {
         const joinedGroupIds = response.data.map((group) => group.id);
         setJoinedGroups(joinedGroupIds);
@@ -45,19 +33,11 @@ const GroupsGrid = () => {
       .catch((error) => {
         console.error("Error fetching joined groups:", error);
       });
-  }, [userToken]); // Re-run if token changes
+  }, []); // Run once on mount
 
   const joinGroup = (id) => {
-    if (!userToken) return;
-
-    axios
-      .post(
-        `http://127.0.0.1:8000/api/groups/${id}/join/`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${userToken}` },
-        }
-      )
+    apiClient
+      .post(`/api/groups/${id}/join/`, {})
       .then((response) => {
         if (response.data.detail === "Joined group") {
           setJoinedGroups((prev) => [...prev, id]);
@@ -102,8 +82,6 @@ const GroupsGrid = () => {
 
       {loading ? (
         <Typography>Loading groups...</Typography>
-      ) : !userToken ? (
-        <Typography color="error">Please log in to view groups.</Typography>
       ) : (
         <Grid container justifyContent="center">
           {exploreList.length === 0 ? (

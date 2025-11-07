@@ -9,10 +9,12 @@ import {
   Box,
   Stack,
   Link,
+  Alert,
 } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
-import api from "./api"; // Axios instance
+import { register } from "../../store/slices/authSlice";
 
 const Register = () => {
   const [form, setForm] = useState({
@@ -21,10 +23,14 @@ const Register = () => {
     password: "",
     confirmPassword: "",
   });
-  const navigate = useNavigate(); // to navigate after registration
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.auth);
+  const [validationError, setValidationError] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setValidationError(null);
   };
 
   const handleSubmit = async (e) => {
@@ -32,23 +38,25 @@ const Register = () => {
 
     // Ensure passwords match
     if (form.password !== form.confirmPassword) {
-      alert("Passwords do not match!");
+      setValidationError("Passwords do not match!");
       return;
     }
 
     try {
-      const response = await api.post("http://127.0.0.1:8000/api/auth/register/", {
-        username: form.username,
-        email: form.email,
-        password: form.password,
-      });
-      console.log("Registration Successful:", response.data);
+      const result = await dispatch(
+        register({
+          username: form.username,
+          email: form.email,
+          password: form.password,
+        })
+      ).unwrap();
 
-      // After successful registration, navigate to login page
-      navigate("/login");
+      console.log("Registration Successful:", result);
+
+      // After successful registration and auto-login, navigate to groups page
+      navigate("/groups");
     } catch (error) {
-      console.error("Registration Error:", error.response.data);
-      alert("Error during registration!");
+      console.error("Registration Error:", error);
     }
   };
 
@@ -78,6 +86,12 @@ const Register = () => {
         <Typography variant="h4" sx={{ mb: 2, fontWeight: 800, color: "#000" }}>
           Register
         </Typography>
+
+        {(error || validationError) && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {validationError || error.message || "Error during registration!"}
+          </Alert>
+        )}
 
         <Box component="form" onSubmit={handleSubmit}>
           <Stack spacing={2}>
@@ -126,6 +140,7 @@ const Register = () => {
               variant="contained"
               size="medium"
               startIcon={<PersonAddAltIcon />}
+              disabled={loading}
               sx={{
                 mt: 1,
                 py: 1,
@@ -137,7 +152,7 @@ const Register = () => {
                 },
               }}
             >
-              Register
+              {loading ? "Registering..." : "Register"}
             </Button>
 
             <Typography variant="body2" sx={{ mt: 1 }}>

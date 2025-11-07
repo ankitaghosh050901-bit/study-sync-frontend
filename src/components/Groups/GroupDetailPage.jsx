@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   Box,
   Typography,
-  Grid,
   Card,
   CardContent,
   Button,
@@ -19,7 +18,6 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 
 //  IMPORTANT: correct relative import (Groups → Sessions)
 import ViewSessionPage from "../Sessions/ViewSessionPage";
-import ToDoGrid from "./ToDoGrid";
 import GroupDocuments from "./GroupDocuments";
 
 export default function GroupDetailPage({ group, onBack, isAdmin = false }) {

@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
+import { Provider, useSelector } from "react-redux";
+import { store } from "./store";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Landing from "./components/Landing";
@@ -14,8 +16,8 @@ import GroupsGrid from "./components/Groups/GroupsGrid";
 import MyAdminGroupPage from "./components/Groups/MyAdminGroupPage";
 import { Box, CssBaseline } from "@mui/material";
 
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+function AppContent() {
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   return (
     <Router>
@@ -27,27 +29,20 @@ function App() {
           minHeight: "100vh",
         }}
       >
-        {/* ✅ Pass authentication prop to Header if needed */}
-        <Header
-          isAuthenticated={isAuthenticated}
-          setIsAuthenticated={setIsAuthenticated}
-        />
+        <Header />
 
         <Box component="main" sx={{ flexGrow: 1 }}>
           <Routes>
             {/* Landing Page */}
             <Route path="/" element={<Landing />} />
 
-            {/* ✅ Login Page with success handler */}
-            <Route
-              path="/login"
-              element={<Login onLogin={() => setIsAuthenticated(true)} />}
-            />
+            {/* Login Page */}
+            <Route path="/login" element={<Login />} />
 
             {/* Register Page */}
             <Route path="/register" element={<Register />} />
 
-            {/* ✅ Protected Groups Page */}
+            {/* Protected Groups Page */}
             <Route
               path="/groups"
               element={
@@ -59,7 +54,7 @@ function App() {
               }
             />
 
-            {/* ✅ Protected Admin Group Page */}
+            {/* Protected Admin Group Page */}
             <Route
               path="/create-group"
               element={
@@ -76,6 +71,14 @@ function App() {
         <Footer />
       </Box>
     </Router>
+  );
+}
+
+function App() {
+  return (
+    <Provider store={store}>
+      <AppContent />
+    </Provider>
   );
 }
 
