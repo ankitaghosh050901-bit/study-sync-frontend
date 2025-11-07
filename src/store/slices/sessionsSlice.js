@@ -4,8 +4,6 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   sessions: [],
   selectedSession: null,
-  loading: false,
-  error: null,
 };
 
 const sessionsSlice = createSlice({

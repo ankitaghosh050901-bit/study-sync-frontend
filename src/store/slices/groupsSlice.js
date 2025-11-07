@@ -5,8 +5,6 @@ const initialState = {
   groups: [],
   joinedGroups: [],
   selectedGroup: null,
-  loading: false,
-  error: null,
 };
 
 const groupsSlice = createSlice({
