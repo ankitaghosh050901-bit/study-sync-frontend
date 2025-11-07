@@ -1,13 +1,14 @@
 import React from "react";
 import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
+import { useSelector } from "react-redux";
 import HomeIcon from "@mui/icons-material/Home";
 import GroupIcon from "@mui/icons-material/Groups";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
-import AuthButton from "./AuthButton"; // ✅ New import
+import AuthButton from "./AuthButton";
 
-const Header = ({ isAuthenticated, setIsAuthenticated }) => {
-  const location = useLocation();
+const Header = () => {
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   return (
     <AppBar
@@ -103,10 +104,7 @@ const Header = ({ isAuthenticated, setIsAuthenticated }) => {
           )}
 
           {/* Reusable AuthButton for Login/Logout */}
-          <AuthButton
-            isAuthenticated={isAuthenticated}
-            onLogout={() => setIsAuthenticated(false)}
-          />
+          <AuthButton />
         </Box>
       </Toolbar>
     </AppBar>

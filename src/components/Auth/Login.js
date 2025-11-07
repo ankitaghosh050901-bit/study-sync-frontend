@@ -8,15 +8,18 @@ import {
   Box,
   Stack,
   Link,
+  Alert,
 } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import LoginIcon from "@mui/icons-material/Login";
-import api from "./api"; // Axios instance
-import { setTokens } from "../../utils/token"; // <-- NEW
+import { login } from "../../store/slices/authSlice";
 
-const Login = ({ onLogin }) => {
+const Login = () => {
   const [form, setForm] = useState({ username: "", password: "" });
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.auth);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -26,28 +29,16 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
 
     try {
-      const response = await api.post("http://127.0.0.1:8000/api/auth/login/", {
-        username: form.username,
-        password: form.password,
-      });
+      const result = await dispatch(
+        login({ username: form.username, password: form.password })
+      ).unwrap();
 
-      const { access, refresh } = response.data;
-      console.log("Login Successful:", response.data);
-
-      // ---- CENTRAL TOKEN STORAGE ----
-      setTokens(access, refresh); // <-- NEW
-
-      // Mark user as logged in
-      onLogin?.();
+      console.log("Login Successful:", result);
 
       // Redirect to groups page
       navigate("/groups");
     } catch (error) {
-      console.error(
-        "Login Error:",
-        error.response ? error.response.data : error
-      );
-      alert("Invalid credentials or error during login");
+      console.error("Login Error:", error);
     }
   };
 
@@ -76,6 +67,12 @@ const Login = ({ onLogin }) => {
           Login
         </Typography>
 
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error.message || "Invalid credentials or error during login"}
+          </Alert>
+        )}
+
         <Box component="form" onSubmit={handleSubmit}>
           <Stack spacing={2.5}>
             <TextField
@@ -102,6 +99,7 @@ const Login = ({ onLogin }) => {
               variant="contained"
               size="large"
               startIcon={<LoginIcon />}
+              disabled={loading}
               sx={{
                 mt: 1,
                 py: 1.2,
@@ -113,7 +111,7 @@ const Login = ({ onLogin }) => {
                 },
               }}
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </Button>
 
             <Typography variant="body2" sx={{ mt: 2 }}>
