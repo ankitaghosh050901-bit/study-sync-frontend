@@ -4,7 +4,7 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { logout } from "../store/slices/authSlice";
+import { logout } from "../features/auth/authSlice";
 
 const AuthButton = () => {
   const navigate = useNavigate();

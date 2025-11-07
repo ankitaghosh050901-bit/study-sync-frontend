@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Grid, Container, Typography, Box, Button } from "@mui/material";
 import GroupCard from "./GroupCard";
 import GroupDetailPage from "./GroupDetailPage";
-import apiClient from "../../services/apiClient";
+import apiClient from "../../api/apiClient";
 
 const GroupsGrid = () => {
   const [selected, setSelected] = useState(null);

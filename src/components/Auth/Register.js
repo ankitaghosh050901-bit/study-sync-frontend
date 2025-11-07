@@ -14,7 +14,7 @@ import {
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
-import { register } from "../../store/slices/authSlice";
+import { register } from "../../features/auth/authSlice";
 
 const Register = () => {
   const [form, setForm] = useState({

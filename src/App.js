@@ -6,13 +6,13 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Provider, useSelector } from "react-redux";
-import { store } from "./store";
+import { store } from "./app/store";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Landing from "./components/Landing";
-import Login from "./components/Auth/Login";
-import Register from "./components/Auth/Register";
-import GroupsGrid from "./components/Groups/GroupsGrid";
+import LoginPage from "./pages/Auth/LoginPage";
+import RegisterPage from "./pages/Auth/RegisterPage";
+import GroupsPage from "./pages/Groups/GroupsPage";
 import MyAdminGroupPage from "./components/Groups/MyAdminGroupPage";
 import { Box, CssBaseline } from "@mui/material";
 
@@ -37,17 +37,17 @@ function AppContent() {
             <Route path="/" element={<Landing />} />
 
             {/* Login Page */}
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<LoginPage />} />
 
             {/* Register Page */}
-            <Route path="/register" element={<Register />} />
+            <Route path="/register" element={<RegisterPage />} />
 
             {/* Protected Groups Page */}
             <Route
               path="/groups"
               element={
                 isAuthenticated ? (
-                  <GroupsGrid />
+                  <GroupsPage />
                 ) : (
                   <Navigate to="/login" replace />
                 )

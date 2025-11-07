@@ -13,7 +13,7 @@ import {
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import LoginIcon from "@mui/icons-material/Login";
-import { login } from "../../store/slices/authSlice";
+import { login } from "../../features/auth/authSlice";
 
 const Login = () => {
   const [form, setForm] = useState({ username: "", password: "" });
