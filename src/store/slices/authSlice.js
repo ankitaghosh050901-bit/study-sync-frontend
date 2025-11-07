@@ -95,7 +95,11 @@ export const login = createAsyncThunk(
       });
 
       const profile = profileResponse.data;
-      const user = { username };
+      // Extract email from profile or set it from profile if available
+      const user = { 
+        username,
+        email: profile.email || profile.user?.email
+      };
 
       // Save to localStorage
       saveAuthToStorage(access, refresh, user, profile);

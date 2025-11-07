@@ -66,13 +66,16 @@ apiClient.interceptors.response.use(
           localStorage.removeItem("user");
           localStorage.removeItem("profile");
           
-          // Redirect to login page
+          // Note: Using window.location.href instead of React Router navigation
+          // because this is an axios interceptor outside React component context.
+          // A full page reload ensures clean state after auth failure.
           window.location.href = "/login";
           
           return Promise.reject(refreshError);
         }
       } else {
         // No refresh token available, redirect to login
+        // Using window.location.href for the same reason as above
         window.location.href = "/login";
       }
     }

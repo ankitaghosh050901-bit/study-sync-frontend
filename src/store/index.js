@@ -12,7 +12,10 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
+      serializableCheck: {
+        // Ignore these action types for serialization checks
+        ignoredActions: ['auth/login/fulfilled', 'auth/register/fulfilled'],
+      },
     }),
 });
 
